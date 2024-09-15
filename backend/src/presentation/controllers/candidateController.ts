@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
-import { addCandidate, findCandidateById } from '../../application/services/candidateService';
+import {
+  addCandidate,
+  findCandidateById,
+  updateCandidateStageService,
+} from '../../application/services/candidateService';
 
+// Exportamos la función addCandidateController
 export const addCandidateController = async (req: Request, res: Response) => {
     try {
         const candidateData = req.body;
@@ -31,4 +36,31 @@ export const getCandidateById = async (req: Request, res: Response) => {
     }
 };
 
-export { addCandidate };
+// Asegúrate de que updateCandidateStage esté exportado si lo estás usando
+export const updateCandidateStage = async (req: Request, res: Response) => {
+    try {
+        const candidateId = parseInt(req.params.id, 10);
+        const { currentInterviewStep } = req.body;
+
+        if (isNaN(candidateId)) {
+            return res.status(400).json({ error: 'Formato de ID de candidato inválido' });
+        }
+
+        if (currentInterviewStep === undefined) {
+            return res.status(400).json({ error: 'El campo currentInterviewStep es requerido' });
+        }
+
+        const updatedApplication = await updateCandidateStageService(
+            candidateId,
+            currentInterviewStep,
+        );
+
+        res.json({
+            message: 'Etapa del candidato actualizada exitosamente',
+            data: updatedApplication,
+        });
+    } catch (error) {
+        console.error('Error al actualizar la etapa del candidato:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};

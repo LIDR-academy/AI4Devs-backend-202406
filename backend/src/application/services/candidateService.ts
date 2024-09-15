@@ -1,4 +1,5 @@
 import { Candidate } from '../../domain/models/Candidate';
+import { Application } from '../../domain/models/Application';
 import { validateCandidateData } from '../validator';
 import { Education } from '../../domain/models/Education';
 import { WorkExperience } from '../../domain/models/WorkExperience';
@@ -62,4 +63,32 @@ export const findCandidateById = async (id: number): Promise<Candidate | null> =
         console.error('Error al buscar el candidato:', error);
         throw new Error('Error al recuperar el candidato');
     }
+};
+
+export const updateCandidateStageService = async (
+  candidateId: number,
+  currentInterviewStep: number,
+) => {
+  try {
+    // Buscar el candidato
+    const candidate = await Candidate.findOne(candidateId);
+    if (!candidate) {
+      throw new Error('Candidato no encontrado');
+    }
+
+    // Buscar la aplicación asociada al candidato
+    const application = await Application.findByCandidateId(candidateId);
+    if (!application) {
+      throw new Error('No se encontró una aplicación para el candidato');
+    }
+
+    // Actualizar la etapa actual de la entrevista
+    application.currentInterviewStep = currentInterviewStep;
+    const updatedApplication = await application.updateStage();
+
+    return updatedApplication;
+  } catch (error) {
+    console.error('Error al actualizar la etapa del candidato:', error);
+    throw error;
+  }
 };
