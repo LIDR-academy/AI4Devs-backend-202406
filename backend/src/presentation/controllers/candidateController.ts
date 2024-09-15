@@ -34,15 +34,15 @@ export const getCandidateById = async (req: Request, res: Response) => {
 export const updateCandidateStageController = async (req: Request, res: Response) => {
     try {
         const candidateId = parseInt(req.params.id);
-        const { newStageId } = req.body;
+        const { newStageId, positionId } = req.body;
 
-        if (isNaN(candidateId) || isNaN(newStageId)) {
+        if (isNaN(candidateId) || isNaN(newStageId) || isNaN(positionId)) {
             return res.status(400).json({ error: 'Invalid ID format' });
         }
 
-        const updatedCandidate = await updateCandidateStage(candidateId, newStageId);
+        const updatedCandidate = await updateCandidateStage(candidateId, positionId, newStageId);
         if (!updatedCandidate) {
-            return res.status(404).json({ error: 'Candidate not found' });
+            return res.status(404).json({ error: 'Candidate or application not found' });
         }
 
         res.json({ message: 'Candidate stage updated successfully', data: updatedCandidate });

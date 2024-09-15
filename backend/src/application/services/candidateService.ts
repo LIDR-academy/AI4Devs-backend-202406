@@ -67,7 +67,7 @@ export const findCandidateById = async (id: number): Promise<Candidate | null> =
     }
 };
 
-export const updateCandidateStage = async (candidateId: number, newStageId: number): Promise<Candidate | null> => {
+export const updateCandidateStage = async (candidateId: number, positionId: number, newStageId: number): Promise<Candidate | null> => {
     try {
         const candidate = await Candidate.findOne(candidateId);
         if (!candidate) {
@@ -75,12 +75,14 @@ export const updateCandidateStage = async (candidateId: number, newStageId: numb
         }
 
         const application = await prisma.application.findFirst({
-            where: { candidateId: candidateId },
-            orderBy: { applicationDate: 'desc' },
+            where: { 
+                candidateId: candidateId,
+                positionId: positionId
+            },
         });
 
         if (!application) {
-            throw new Error('No application found for this candidate');
+            throw new Error('No application found for this candidate and position');
         }
 
         const updatedApplication = await prisma.application.update({

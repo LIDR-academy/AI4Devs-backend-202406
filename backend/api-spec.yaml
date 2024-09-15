@@ -220,7 +220,7 @@ paths:
   /candidates/{id}/stage:
     put:
       summary: Update candidate stage
-      description: Updates the current stage of the interview process for a specific candidate
+      description: Updates the current stage of the interview process for a specific candidate and position
       parameters:
         - in: path
           name: id
@@ -238,6 +238,9 @@ paths:
                 newStageId:
                   type: integer
                   description: The ID of the new interview stage
+                positionId:
+                  type: integer
+                  description: The ID of the position
       responses:
         '200':
           description: Successful response
@@ -253,7 +256,7 @@ paths:
         '400':
           description: Invalid ID format
         '404':
-          description: Candidate not found
+          description: Candidate or application not found
         '500':
           description: Internal server error
 
