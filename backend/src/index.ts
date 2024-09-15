@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import candidateRoutes from './routes/candidateRoutes';
 import { uploadFile } from './application/services/fileUploadService';
 import cors from 'cors';
+import positionRoutes from './routes/positionRoutes';
 
 // Extender la interfaz Request para incluir prisma
 declare global {
@@ -41,6 +42,8 @@ app.use('/candidates', candidateRoutes);
 
 // Route for file uploads
 app.post('/upload', uploadFile);
+
+app.use('/positions', positionRoutes);
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
