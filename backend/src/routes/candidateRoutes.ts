@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addCandidate, getCandidateById } from '../presentation/controllers/candidateController';
+import { addCandidate, getCandidateById, getCandidatesByPositionId } from '../presentation/controllers/candidateController';
 
 const router = Router();
 
@@ -17,6 +17,10 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Nueva ruta para obtener candidatos por Position ID
+router.get('/positions/:id/candidates', getCandidatesByPositionId);
+
+// Ruta para obtener un candidato por ID
 router.get('/:id', getCandidateById);
 
 export default router;
