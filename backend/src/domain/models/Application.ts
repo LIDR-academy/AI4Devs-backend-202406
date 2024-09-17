@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Interview } from './Interview';
+import { InterviewStep } from './InterviewStep';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ export class Application {
     applicationDate: Date;
     currentInterviewStep: number;
     notes?: string;
-    interviews: Interview[]; // Added this line
+    interviews: Interview[];
 
     constructor(data: any) {
         this.id = data.id;
@@ -19,7 +20,7 @@ export class Application {
         this.applicationDate = new Date(data.applicationDate);
         this.currentInterviewStep = data.currentInterviewStep;
         this.notes = data.notes;
-        this.interviews = data.interviews || []; // Added this line
+        this.interviews = data.interviews || [];
     }
 
     async save() {
@@ -46,8 +47,39 @@ export class Application {
     static async findOne(id: number): Promise<Application | null> {
         const data = await prisma.application.findUnique({
             where: { id: id },
+            include: {
+                interviews: true,
+            },
         });
         if (!data) return null;
         return new Application(data);
+    }
+
+    static async updateCurrentInterviewStep(applicationId: number, newStepId: number): Promise<void> {
+        await prisma.application.update({
+            where: { id: applicationId },
+            data: { currentInterviewStep: newStepId },
+        });
+    }
+
+    static async hasResultsInStep(applicationId: number, stepId: number): Promise<boolean> {
+        const interviews = await prisma.interview.findMany({
+            where: {
+                applicationId: applicationId,
+                interviewStepId: stepId,
+                NOT: { result: null },
+            },
+        });
+        return interviews.length > 0;
+    }
+
+    static async findInterviewFlow(currentStepId: number) {
+        const currentStep = await InterviewStep.findOne(currentStepId);
+        if (!currentStep) return null;
+        const flow = await prisma.interviewFlow.findUnique({
+            where: { id: currentStep.interviewFlowId },
+            include: { interviewSteps: true },
+        });
+        return flow;
     }
 }

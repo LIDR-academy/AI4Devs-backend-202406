@@ -1,29 +1,32 @@
 import { PrismaClient } from '@prisma/client';
+import { InterviewStep } from './InterviewStep';
 
 const prisma = new PrismaClient();
 
 export class InterviewFlow {
     id?: number;
-    description?: string;
+    name: string;
+    interviewSteps: InterviewStep[];
 
     constructor(data: any) {
         this.id = data.id;
-        this.description = data.description;
+        this.name = data.name;
+        this.interviewSteps = data.interviewSteps || [];
     }
 
     async save() {
-        const interviewFlowData: any = {
-            description: this.description,
+        const flowData: any = {
+            name: this.name,
         };
 
         if (this.id) {
             return await prisma.interviewFlow.update({
                 where: { id: this.id },
-                data: interviewFlowData,
+                data: flowData,
             });
         } else {
             return await prisma.interviewFlow.create({
-                data: interviewFlowData,
+                data: flowData,
             });
         }
     }
@@ -31,6 +34,7 @@ export class InterviewFlow {
     static async findOne(id: number): Promise<InterviewFlow | null> {
         const data = await prisma.interviewFlow.findUnique({
             where: { id: id },
+            include: { interviewSteps: true },
         });
         if (!data) return null;
         return new InterviewFlow(data);

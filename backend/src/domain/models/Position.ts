@@ -1,4 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import { Candidate } from './Candidate';
+import { Interview } from './Interview';
+import { Application } from './Application';
 
 const prisma = new PrismaClient();
 
@@ -82,6 +85,18 @@ export class Position {
         });
         if (!data) return null;
         return new Position(data);
+    }
+
+    static async getCandidatesForPosition(positionId: number) {
+        const applications = await prisma.application.findMany({
+            where: { positionId },
+            include: {
+                candidate: true,
+                interviews: true,
+            },
+        });
+
+        return applications;
     }
 }
 

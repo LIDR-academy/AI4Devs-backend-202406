@@ -53,4 +53,11 @@ export class Interview {
         if (!data) return null;
         return new Interview(data);
     }
+
+    static async create(interviewData: any): Promise<Interview> {
+        const createdInterview = await prisma.interview.create({
+            data: interviewData,
+        });
+        return new Interview(createdInterview);
+    }
 }

@@ -25,8 +25,8 @@ export class Candidate {
         this.email = data.email;
         this.phone = data.phone;
         this.address = data.address;
-        this.education = data.education || [];
-        this.workExperience = data.workExperience || [];
+        this.education = data.educations || [];
+        this.workExperience = data.workExperiences || [];
         this.resumes = data.resumes || [];
         this.applications = data.applications || [];
     }
@@ -34,14 +34,12 @@ export class Candidate {
     async save() {
         const candidateData: any = {};
 
-        // Solo añadir al objeto candidateData los campos que no son undefined
         if (this.firstName !== undefined) candidateData.firstName = this.firstName;
         if (this.lastName !== undefined) candidateData.lastName = this.lastName;
         if (this.email !== undefined) candidateData.email = this.email;
         if (this.phone !== undefined) candidateData.phone = this.phone;
         if (this.address !== undefined) candidateData.address = this.address;
 
-        // Añadir educations si hay alguna para añadir
         if (this.education.length > 0) {
             candidateData.educations = {
                 create: this.education.map(edu => ({
@@ -53,7 +51,6 @@ export class Candidate {
             };
         }
 
-        // Añadir workExperiences si hay alguna para añadir
         if (this.workExperience.length > 0) {
             candidateData.workExperiences = {
                 create: this.workExperience.map(exp => ({
@@ -66,7 +63,6 @@ export class Candidate {
             };
         }
 
-        // Añadir resumes si hay alguno para añadir
         if (this.resumes.length > 0) {
             candidateData.resumes = {
                 create: this.resumes.map(resume => ({
@@ -76,7 +72,6 @@ export class Candidate {
             };
         }
 
-        // Añadir applications si hay alguna para añadir
         if (this.applications.length > 0) {
             candidateData.applications = {
                 create: this.applications.map(app => ({
@@ -90,7 +85,6 @@ export class Candidate {
         }
 
         if (this.id) {
-            // Actualizar un candidato existente
             try {
                 return await prisma.candidate.update({
                     where: { id: this.id },
@@ -98,30 +92,21 @@ export class Candidate {
                 });
             } catch (error: any) {
                 console.log(error);
-                if (error instanceof Prisma.PrismaClientInitializationError) {
-                    // Database connection error
-                    throw new Error('No se pudo conectar con la base de datos. Por favor, asegúrese de que el servidor de base de datos esté en ejecución.');
-                } else if (error.code === 'P2025') {
-                    // Record not found error
+                if (error.code === 'P2025') {
                     throw new Error('No se pudo encontrar el registro del candidato con el ID proporcionado.');
                 } else {
-                    throw error;
+                    throw new Error('Ocurrió un error al conectar con la base de datos.');
                 }
             }
         } else {
-            // Crear un nuevo candidato
             try {
                 const result = await prisma.candidate.create({
                     data: candidateData
                 });
                 return result;
             } catch (error: any) {
-                if (error instanceof Prisma.PrismaClientInitializationError) {
-                    // Database connection error
-                    throw new Error('No se pudo conectar con la base de datos. Por favor, asegúrese de que el servidor de base de datos esté en ejecución.');
-                } else {
-                    throw error;
-                }
+                console.log(error);
+                throw new Error('Ocurrió un error al conectar con la base de datos.');
             }
         }
     }
@@ -135,24 +120,8 @@ export class Candidate {
                 resumes: true,
                 applications: {
                     include: {
-                        position: {
-                            select: {
-                                id: true,
-                                title: true
-                            }
-                        },
-                        interviews: {
-                            select: {
-                                interviewDate: true,
-                                interviewStep: {
-                                    select: {
-                                        name: true
-                                    }
-                                },
-                                notes: true,
-                                score: true
-                            }
-                        }
+                        position: true,
+                        interviews: true,
                     }
                 }
             }

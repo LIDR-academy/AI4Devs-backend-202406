@@ -185,4 +185,203 @@ paths:
           description: Invalid file type, only PDF and DOCX are allowed
         '500':
           description: Error during the file upload process
+  /candidates/{id}/stage:
+    put:
+      summary: Actualizar la etapa de entrevista de un candidato
+      description: Actualiza la etapa actual del proceso de entrevista de una aplicación específica de un candidato.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del candidato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: integer
+                  description: ID de la aplicación
+                interviewStepId:
+                  type: integer
+                  description: ID de la nueva etapa de entrevista
+                employeeId:
+                  type: integer
+                  description: ID del empleado que realiza la entrevista
+                interviewDate:
+                  type: string
+                  format: date
+                  pattern: '^\d{4}-\d{2}-\d{2}$'
+                  description: Fecha de la entrevista
+      responses:
+        '200':
+          description: Etapa de entrevista actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Candidate'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+        '404':
+          description: Candidato o aplicación no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+components:
+  schemas:
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+        workExperiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperience'
+        resumes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resume'
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
 
+    Application:
+      type: object
+      properties:
+        id:
+          type: integer
+        positionId:
+          type: integer
+        candidateId:
+          type: integer
+        applicationDate:
+          type: string
+          format: date-time
+        currentInterviewStep:
+          type: integer
+        notes:
+          type: string
+        interviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interview'
+
+    InterviewStep:
+      type: object
+      properties:
+        id:
+          type: integer
+        interviewFlowId:
+          type: integer
+        interviewTypeId:
+          type: integer
+        name:
+          type: string
+        orderIndex:
+          type: integer
+
+    Education:
+      type: object
+      properties:
+        id:
+          type: integer
+        institution:
+          type: string
+        title:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    WorkExperience:
+      type: object
+      properties:
+        id:
+          type: integer
+        company:
+          type: string
+        position:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    Resume:
+      type: object
+      properties:
+        id:
+          type: integer
+        filePath:
+          type: string
+        fileType:
+          type: string
+        uploadDate:
+          type: string
+          format: date-time
+
+    Interview:
+      type: object
+      properties:
+        id:
+          type: integer
+        applicationId:
+          type: integer
+        interviewStepId:
+          type: integer
+        employeeId:
+          type: integer
+        interviewDate:
+          type: string
+          format: date-time
+        result:
+          type: string
+        score:
+          type: integer
+        notes:
+          type: string

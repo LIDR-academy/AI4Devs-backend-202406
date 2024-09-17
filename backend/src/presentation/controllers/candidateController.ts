@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addCandidate, findCandidateById } from '../../application/services/candidateService';
+import { addCandidate, findCandidateById, updateCandidateStage } from '../../application/services/candidateService';
 
 export const addCandidateController = async (req: Request, res: Response) => {
     try {
@@ -28,6 +28,31 @@ export const getCandidateById = async (req: Request, res: Response) => {
         res.json(candidate);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+export const updateCandidateStageController = async (req: Request, res: Response) => {
+    try {
+        const candidateId = parseInt(req.params.id);
+        if (isNaN(candidateId)) {
+            return res.status(400).json({ error: 'Formato de ID inválido' });
+        }
+
+        const { applicationId, interviewStepId, employeeId, interviewDate } = req.body;
+
+        if (!applicationId || !interviewStepId || !employeeId || !interviewDate) {
+            return res.status(400).json({ error: 'Faltan campos requeridos' });
+        }
+
+        const updatedCandidate = await updateCandidateStage(candidateId, applicationId, {
+            interviewStepId,
+            employeeId,
+            interviewDate: new Date(interviewDate),
+        });
+
+        res.status(200).json({ message: 'Etapa actualizada exitosamente', data: updatedCandidate });
+    } catch (error: any) {
+        res.status(400).json({ message: 'Error al actualizar la etapa', error: error.message });
     }
 };
 
