@@ -185,4 +185,38 @@ paths:
           description: Invalid file type, only PDF and DOCX are allowed
         '500':
           description: Error during the file upload process
+  /positions/{id}/candidates:
+    get:
+      summary: Get candidates for a position
+      description: Retrieves all candidates in process for a given position.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the position
+      responses:
+        '200':
+          description: A list of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fullName:
+                      type: string
+                      description: Full name of the candidate
+                    currentInterviewStep:
+                      type: integer
+                      description: Current interview step of the candidate
+                    averageScore:
+                      type: number
+                      description: Average score of the candidate
+        '400':
+          description: Invalid position ID format
+        '500':
+          description: Internal server error
 
