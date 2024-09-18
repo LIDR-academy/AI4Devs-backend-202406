@@ -17,6 +17,7 @@ export class Candidate {
     workExperience: WorkExperience[];
     resumes: Resume[];
     applications: Application[];
+    currentInterviewStep: number;
 
     constructor(data: any) {
         this.id = data.id;
@@ -29,6 +30,7 @@ export class Candidate {
         this.workExperience = data.workExperience || [];
         this.resumes = data.resumes || [];
         this.applications = data.applications || [];
+        this.currentInterviewStep = data.currentInterviewStep || 0; // Default to 0 if not provided
     }
 
     async save() {
