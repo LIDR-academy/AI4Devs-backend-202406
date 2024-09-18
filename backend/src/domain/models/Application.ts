@@ -50,4 +50,12 @@ export class Application {
         if (!data) return null;
         return new Application(data);
     }
+
+    static async updateStage(id: number, currentInterviewStep: number): Promise<Application | null> {
+        const updatedApplication = await prisma.application.update({
+            where: { id },
+            data: { currentInterviewStep },
+        });
+        return updatedApplication ? new Application(updatedApplication) : null;
+    }
 }
