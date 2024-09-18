@@ -3,6 +3,8 @@ import { validateCandidateData } from '../validator';
 import { Education } from '../../domain/models/Education';
 import { WorkExperience } from '../../domain/models/WorkExperience';
 import { Resume } from '../../domain/models/Resume';
+import { ICandidateRepository } from '../../domain/repositories/ICandidateRepository';
+import { CandidateNotFoundError } from '../../domain/errors/CandidateNotFoundError';
 
 export const addCandidate = async (candidateData: any) => {
     try {
@@ -63,3 +65,17 @@ export const findCandidateById = async (id: number): Promise<Candidate | null> =
         throw new Error('Error al recuperar el candidato');
     }
 };
+
+export class UpdateCandidateStageUseCase {
+  constructor(private candidateRepository: ICandidateRepository) {}
+
+  async execute(candidateId: number, newStage: number): Promise<Candidate> {
+    const candidate = await this.candidateRepository.findById(candidateId);
+    if (!candidate) {
+      throw new CandidateNotFoundError(candidateId);
+    }
+
+    candidate.currentInterviewStep = newStage;
+    return await this.candidateRepository.update(candidate);
+  }
+}
