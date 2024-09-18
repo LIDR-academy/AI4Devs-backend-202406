@@ -6,6 +6,7 @@ import candidateRoutes from './routes/candidateRoutes';
 import { uploadFile } from './application/services/fileUploadService';
 import cors from 'cors';
 import positionRoutes from './routes/positionRoutes';
+import applicationRoutes from './routes/applicationRoutes';
 
 // Extender la interfaz Request para incluir prisma
 declare global {
@@ -40,6 +41,7 @@ app.use(cors({
 // Import and use candidateRoutes
 app.use('/candidates', candidateRoutes);
 app.use('/positions', positionRoutes);
+app.use('/applications', applicationRoutes);
 
 // Route for file uploads
 app.post('/upload', uploadFile);

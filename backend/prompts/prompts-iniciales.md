@@ -333,18 +333,124 @@ The key change is in line 6, where we've replaced `this.calculateAverageScore` w
 
 This change should resolve the error you're encountering.
 
-## Prompt 7
+# Prompt 7
+
+create the insert sql all necessary queries to test the created endpoint, with 1 positions and 2 candidates
+
+## Answer 7 - AI
+
+To test the created endpoint for getting candidates for a position, we need to insert data for companies, interview flows, positions, candidates, interview types, interview steps, and applications. Here's the SQL to create the necessary test data:
+
+```sql
+-- Insert Company
+INSERT INTO "Company" (name) VALUES ('Test Company') RETURNING id;
+
+-- Insert Interview Flow
+INSERT INTO "InterviewFlow" (description) VALUES ('Standard Interview Process') RETURNING id;
+
+-- Insert Position
+INSERT INTO "Position" (
+    "companyId", 
+    "interviewFlowId", 
+    title, 
+    description, 
+    status, 
+    "isVisible", 
+    location, 
+    "jobDescription"
+) VALUES (
+    1, -- Assuming this is the id returned from the Company insert
+    1, -- Assuming this is the id returned from the InterviewFlow insert
+    'Software Engineer',
+    'We are looking for a talented software engineer',
+    'Open',
+    true,
+    'Remote',
+    'Develop and maintain software applications'
+) RETURNING id;
+
+-- Insert Candidates
+INSERT INTO "Candidate" (
+    "firstName", 
+    "lastName", 
+    email, 
+    phone, 
+    address
+) VALUES 
+('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
+('Jane', 'Smith', 'jane.smith@example.com', '0987654321', '456 Elm St')
+RETURNING id;
+
+-- Insert Interview Types
+INSERT INTO "InterviewType" (name, description)
+VALUES 
+('HR Interview', 'Initial screening'),
+('Technical Interview', 'Assess technical skills')
+RETURNING id;
+
+-- Insert Interview Steps
+INSERT INTO "InterviewStep" (
+    "interviewFlowId", 
+    "interviewTypeId", 
+    name, 
+    "orderIndex"
+)
+VALUES 
+(1, 1, 'HR Screening', 1),
+(1, 2, 'Technical Assessment', 2)
+RETURNING id;
+
+-- Insert Applications
+INSERT INTO "Application" (
+    "positionId", 
+    "candidateId", 
+    "applicationDate", 
+    "currentInterviewStep"
+)
+VALUES 
+(1, 1, CURRENT_TIMESTAMP, 1),
+(1, 2, CURRENT_TIMESTAMP, 2);
+```
+
+This SQL script will create one position and two candidates, along with the necessary related data to test the endpoint. Make sure to adjust the IDs in the script if your database already contains data or if the auto-incrementing IDs start from a different number.
+
+After running these queries, you can test the endpoint by making a GET request to:
+
+```
+GET http://localhost:3010/positions/1/candidates
+```
+
+This should return the candidates (John Doe and Jane Smith) who have applied for the Software Engineer position.
+
+## Prompt 8
 
 Let's create the next end point. Here are the specifications:
 
 ---
 
-**Endpoint:** `PUT /candidates/:id/stage`
+**Endpoint:** `PUT /candidates/:id/application/:id/stage`
 
 This endpoint will update the stage of a candidate (currentInterviewStep of the table Application). It allows modifying the current interview process stage for a specific candidate.
 
 ---
 
-Take in account there are already some files for the candidate like @Candidate.ts @candidateService.ts @candidateRoutes.ts , do not modify the existing code for the other endpoints, but for the new endpoint use the same structure and best practices we did for Use the same structure we build for the endpoint create before `GET /positions/:id/candidates` @positionController.ts 
+Take in account there are already some files for the candidate like  @candidateService.ts @candidateRoutes.ts , do not modify the existing code for the other endpoints, but for the new endpoint use the same structure and best practices we did for Use the same structure we build for the endpoint create before `GET /positions/:id/candidates` @positionController.ts 
+
+Take in account the next:
+
+### Explanation:
+
+1. **`Application` Model:**
+   - The `Application` model represents a candidate's application for a specific position. It includes a field named `currentInterviewStep` that holds the ID of the `InterviewStep` the candidate is currently on.
+   - This means that each application tracks which interview step the candidate is currently at in the hiring process.
+
+2. **`InterviewStep` Model:**
+   - The `InterviewStep` model represents a specific step in the interview process. It has fields such as `name` and `orderIndex` to indicate the order and type of interview step (e.g., initial screening, technical interview, HR interview).
+   - The `Application` model references the `InterviewStep` via the `currentInterviewStep` field, which shows the current interview stage of the candidate.
+
+### Current Stage of a Candidate:
+- To determine the current stage of a candidate, you look at the `currentInterviewStep` field in the `Application` model. This field points to a specific `InterviewStep` ID, indicating which interview stage the candidate is currently at in the hiring process for that particular application.
 
 ## Answer 7 - AI
+
+.... all the code

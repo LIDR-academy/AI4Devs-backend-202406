@@ -20,4 +20,31 @@ export class ApplicationRepository implements IApplicationRepository {
     });
     return applications.map((app) => new Application(app));
   }
+
+  async findById(applicationId: number): Promise<Application | null> {
+    const data = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        candidate: true,
+        interviewStep: true,
+        interviews: {
+          include: {
+            interviewStep: true,
+          },
+        },
+      },
+    });
+    if (!data) return null;
+    return new Application(data);
+  }
+
+  async update(application: Application): Promise<Application> {
+    const updatedData = await this.prisma.application.update({
+      where: { id: application.id },
+      data: {
+        currentInterviewStep: application.currentInterviewStep,
+      },
+    });
+    return new Application(updatedData);
+  }
 }
