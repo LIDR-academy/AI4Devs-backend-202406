@@ -35,14 +35,14 @@ export const updateCandidateStageController = async (req: Request, res: Response
     try {
         const candidateId = parseInt(req.params.candidateId);
         const applicationId = parseInt(req.params.applicationId);
-        const { stage } = req.body;
+        const stage = parseInt(req.body.stage);
 
         if (isNaN(candidateId) || isNaN(applicationId)) {
             return res.status(400).json({ error: 'Invalid ID format' });
         }
 
-        if (typeof stage !== 'number' || stage < 1) {
-            return res.status(400).json({ error: 'Invalid stage format' });
+        if (isNaN(stage) || stage < 1) {
+            return res.status(400).json({ error: 'Invalid stage format: ' + (typeof stage) + ' with value: ' + stage });
         }
 
         const updatedApplication = await updateCandidateStage(candidateId, applicationId, stage);

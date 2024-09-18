@@ -1061,5 +1061,156 @@ Gracias por la aclaración. Entiendo que necesitamos actualizar el campo `curren
 ¿Cuál de estos enfoques prefiere para proporcionar los datos necesarios? ¿O tiene alguna otra preferencia para la estructura del endpoint?
 
 ## Confirmar opción de cambiar el endpoint a `PUT /candidates/:candidateId/applications/:applicationId/stage`
+```
+Seguiremos con la opción 1
+```
 
 ## Respuesta de Claude 3.5 (con contexto global)
+Entendido, implementaremos la opción 1 con el endpoint `PUT /candidates/:candidateId/applications/:applicationId/stage`. Vamos a actualizar los archivos necesarios:
+
+1. Actualizar el archivo de rutas:
+
+```typescript:backend/src/routes/candidateRoutes.ts
+import { Router } from 'express';
+import { updateCandidateStageController } from '../presentation/controllers/candidateController';
+
+const router = Router();
+
+// Otras rutas existentes...
+
+router.put('/:candidateId/applications/:applicationId/stage', updateCandidateStageController);
+
+export default router;
+```
+
+2. Actualizar el controlador:
+
+```typescript:backend/src/presentation/controllers/candidateController.ts
+import { Request, Response } from 'express';
+import { updateCandidateStage } from '../../application/services/candidateService';
+
+export const updateCandidateStageController = async (req: Request, res: Response) => {
+    try {
+        const candidateId = parseInt(req.params.candidateId);
+        const applicationId = parseInt(req.params.applicationId);
+        const { stage } = req.body;
+
+        if (isNaN(candidateId) || isNaN(applicationId)) {
+            return res.status(400).json({ error: 'Invalid ID format' });
+        }
+
+        if (typeof stage !== 'number' || stage < 1) {
+            return res.status(400).json({ error: 'Invalid stage format' });
+        }
+
+        const updatedApplication = await updateCandidateStage(candidateId, applicationId, stage);
+        if (!updatedApplication) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+
+        res.json(updatedApplication);
+    } catch (error) {
+        console.error('Error updating candidate stage:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+```
+
+3. Actualizar el servicio:
+
+```typescript:backend/src/application/services/candidateService.ts
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export const updateCandidateStage = async (candidateId: number, applicationId: number, stage: number) => {
+    try {
+        const updatedApplication = await prisma.application.updateMany({
+            where: {
+                id: applicationId,
+                candidateId: candidateId
+            },
+            data: {
+                currentInterviewStep: stage
+            }
+        });
+
+        if (updatedApplication.count === 0) {
+            return null;
+        }
+
+        return await prisma.application.findUnique({
+            where: {
+                id: applicationId
+            },
+            include: {
+                candidate: true,
+                position: true
+            }
+        });
+    } catch (error) {
+        console.error('Error updating candidate stage:', error);
+        throw new Error('Failed to update candidate stage');
+    }
+};
+```
+
+4. Actualizar la especificación de la API:
+
+```yaml:backend/api-spec.yaml
+paths:
+  /candidates/{candidateId}/applications/{applicationId}/stage:
+    put:
+      summary: Update candidate's interview stage
+      description: Updates the current interview stage of a specific candidate's application.
+      parameters:
+        - in: path
+          name: candidateId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the candidate
+        - in: path
+          name: applicationId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stage:
+                  type: integer
+                  description: The new interview stage for the candidate's application
+      responses:
+        '200':
+          description: Application stage updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: Invalid ID or stage format
+        '404':
+          description: Application not found
+        '500':
+          description: Internal server error
+```
+
+Esta implementación sigue los principios SOLID, DRY y Domain-Driven Design:
+
+1. Single Responsibility Principle: Cada componente tiene una única responsabilidad.
+2. Open/Closed Principle: El código está abierto para extensión pero cerrado para modificación.
+3. Dependency Inversion: El controlador depende de abstracciones (servicios) en lugar de implementaciones concretas.
+4. DRY: No hay repetición de código.
+5. Domain-Driven Design: La lógica de negocio está encapsulada en el servicio, separada de la capa de presentación.
+
+
+# Prompt para Fix petición PUT
+```
+el campo 'stage' llega como "string". Como puedo validarlo como número?
+```
