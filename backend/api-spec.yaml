@@ -219,4 +219,44 @@ paths:
           description: Invalid position ID format
         '500':
           description: Internal server error
+  /candidates/{candidateId}/applications/{applicationId}/stage:
+    put:
+      summary: Update candidate's interview stage
+      description: Updates the current interview stage of a specific candidate's application.
+      parameters:
+        - in: path
+          name: candidateId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the candidate
+        - in: path
+          name: applicationId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stage:
+                  type: integer
+                  description: The new interview stage for the candidate's application
+      responses:
+        '200':
+          description: Application stage updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: Invalid ID or stage format
+        '404':
+          description: Application not found
+        '500':
+          description: Internal server error
 
