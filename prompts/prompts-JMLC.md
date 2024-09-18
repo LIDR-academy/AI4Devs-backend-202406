@@ -1210,7 +1210,123 @@ Esta implementación sigue los principios SOLID, DRY y Domain-Driven Design:
 5. Domain-Driven Design: La lógica de negocio está encapsulada en el servicio, separada de la capa de presentación.
 
 
-# Prompt para Fix petición PUT
+# Pruebas de los endpoints
+
+## GET
+```
+<▸> ~ http :3010/positions/1/candidates
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: http://localhost:3000
+Connection: keep-alive
+Content-Length: 210
+Content-Type: application/json; charset=utf-8
+Date: Wed, 18 Sep 2024 06:58:12 GMT
+ETag: W/"d2-G9287OrorG+QP+lvHK4zEudxVGg"
+Keep-Alive: timeout=5
+Vary: Origin
+X-Powered-By: Express
+
+[
+    {
+        "averageScore": 5,
+        "currentInterviewStep": 2,
+        "fullName": "John Doe"
+    },
+    {
+        "averageScore": 4,
+        "currentInterviewStep": 2,
+        "fullName": "Jane Smith"
+    },
+    {
+        "averageScore": null,
+        "currentInterviewStep": 1,
+        "fullName": "Carlos García"
+    }
+]
+
+```
+
+## PUT (ERROR)
+
+```
+<▸> ~ http PUT :3010/candidates/3/applications/4/stage stage=2
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: http://localhost:3000
+Connection: keep-alive
+Content-Length: 32
+Content-Type: application/json; charset=utf-8
+Date: Wed, 18 Sep 2024 06:45:47 GMT
+ETag: W/"20-XLmEO/wOPkbView69Ek7iVULuSc"
+Keep-Alive: timeout=5
+Vary: Origin
+X-Powered-By: Express
+
+{
+    "error": "Invalid stage format"
+}
+```
+
+
+### Prompt para Fix petición PUT
 ```
 el campo 'stage' llega como "string". Como puedo validarlo como número?
+```
+
+
+## PUT (Fixed)
+
+```
+http PUT :3010/candidates/3/applications/4/stage stage=2
+
+
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: http://localhost:3000
+Connection: keep-alive
+Content-Length: 923
+Content-Type: application/json; charset=utf-8
+Date: Wed, 18 Sep 2024 06:52:37 GMT
+ETag: W/"39b-T2h/J+vfRyZ1RsXfDQjQcSk/m7Q"
+Keep-Alive: timeout=5
+Vary: Origin
+X-Powered-By: Express
+
+{
+    "applicationDate": "2024-09-18T06:14:49.182Z",
+    "candidate": {
+        "address": "789 Pine St",
+        "email": "carlos.garcia@example.com",
+        "firstName": "Carlos",
+        "id": 3,
+        "lastName": "García",
+        "phone": "1122334455"
+    },
+    "candidateId": 3,
+    "currentInterviewStep": 2,
+    "id": 4,
+    "notes": null,
+    "position": {
+        "applicationDeadline": "2024-12-31T00:00:00.000Z",
+        "benefits": "Health insurance, 401k, Paid time off",
+        "companyDescription": "LTI is a leading HR solutions provider.",
+        "companyId": 1,
+        "contactInfo": "hr@lti.com",
+        "description": "Develop and maintain software applications.",
+        "employmentType": "Full-time",
+        "id": 1,
+        "interviewFlowId": 1,
+        "isVisible": true,
+        "jobDescription": "Full-stack development",
+        "location": "Remote",
+        "requirements": "3+ years of experience in software development, knowledge in React and Node.js",
+        "responsibilities": "Develop, test, and maintain software solutions.",
+        "salaryMax": 80000,
+        "salaryMin": 50000,
+        "status": "Open",
+        "title": "Software Engineer"
+    },
+    "positionId": 1
+}
 ```
