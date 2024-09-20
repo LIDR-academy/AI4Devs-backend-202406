@@ -22,3 +22,26 @@ export const findCandidatesByPositionId = async (positionId: number) => {
 		averageScore: app.interviews.reduce((acc, interview) => acc + (interview.score || 0), 0) / app.interviews.length,
 	}));
 };
+
+export const updateInterviewStepService = async (positionId: number, candidateId: number, stepId: number) => {
+  const application = await prisma.application.findFirst({
+      where: { positionId, candidateId },
+  });
+
+  if (!application) {
+      return null;
+  }
+
+  const interviewStep = await prisma.interviewStep.findUnique({
+      where: { id: stepId },
+  });
+
+  if (!interviewStep) {
+    return null;
+  }
+
+  return await prisma.application.update({
+      where: { id: application.id },
+      data: { currentInterviewStep: stepId },
+  });
+};
