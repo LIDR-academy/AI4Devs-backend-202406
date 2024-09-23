@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addCandidate,
   getCandidateById,
+  updateCandidateStage,
 } from '../presentation/controllers/candidateController';
 
 const router = Router();
@@ -21,5 +22,7 @@ router.post('/', async (req, res) => {
 });
 
 router.get('/:id', getCandidateById);
+
+router.put('/:id', updateCandidateStage);
 
 export default router;
