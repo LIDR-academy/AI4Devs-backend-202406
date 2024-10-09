@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addCandidate, findCandidateById } from '../../application/services/candidateService';
+import { addCandidate, findCandidateById, updateCandidateStage } from '../../application/services/candidateService';
 
 export const addCandidateController = async (req: Request, res: Response) => {
     try {
@@ -32,3 +32,20 @@ export const getCandidateById = async (req: Request, res: Response) => {
 };
 
 export { addCandidate };
+
+export const updateCandidateStageController = async (req: Request, res: Response) => {
+    try {
+        const candidateId = parseInt(req.params.id);
+        const { positionId, newStageId } = req.body;
+
+        if (isNaN(candidateId) || isNaN(positionId) || isNaN(newStageId)) {
+            return res.status(400).json({ error: 'Invalid ID format' });
+        }
+
+        const updatedApplication = await updateCandidateStage(candidateId, positionId, newStageId);
+        res.json(updatedApplication);
+    } catch (error) {
+        console.error('Error updating candidate stage:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
